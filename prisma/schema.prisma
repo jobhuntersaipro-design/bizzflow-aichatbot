@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// A person who signs in to the chatbot. role: owner | manager | agent.
+// owner manages agents and settings; manager edits settings; agent works chats.
+model Agent {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String    @map("password_hash")
+  role         String    @default("agent")
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("agents")
+}
+
+// Append-only record of what an agent did. agentId is null for system actions.
+model AuditLog {
+  id        String   @id @default(cuid())
+  agentId   String?  @map("agent_id")
+  action    String
+  detail    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+// WhatsApp Cloud API webhooks forwarded by 360dialog (coexistence spike).
+// No relation to cases, bills, customers, or orders — this table is the only store.
+model WhatsappWebhookEvent {
+  id          String   @id @default(cuid())
+  receivedAt  DateTime @default(now()) @map("received_at")
+  field       String?
+  fromWaId    String?  @map("from_wa_id")
+  toWaId      String?  @map("to_wa_id")
+  messageId   String?  @map("message_id")
+  messageType String?  @map("message_type")
+  textPreview String?  @map("text_preview")
+  rawBody     String   @map("raw_body")
+
+  @@index([receivedAt])
+  @@map("whatsapp_webhook_events")
+}
+
+// Per-chat state for the admin WhatsApp inbox. Keyed on the customer's wa_id.
+// A chat is closed while closed_at is newer than its last inbound message, so
+// a new customer message reopens it without a webhook-side write.
+model WhatsappConversation {
+  waId          String    @id @map("wa_id")
+  closedAt      DateTime? @map("closed_at")
+  lastReadAt    DateTime? @map("last_read_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  // Chat summary, kept current by every webhook write (src/lib/whatsapp-store.ts).
+  name          String?
+  lastMessageAt DateTime? @map("last_message_at")
+  lastInboundAt DateTime? @map("last_inbound_at")
+  lastPreview   String?   @map("last_preview")
+  // CRM. *_by is who set the field last: "ai" or "admin". Claude only writes
+  // a field it set last, so an admin's choice sticks until handed back.
+  stageId       String?   @map("stage_id")
+  folderId      String?   @map("folder_id")
+  tagIds        String[]  @default([]) @map("tag_ids")
+  stageBy       String?   @map("stage_by")
+  folderBy      String?   @map("folder_by")
+  tagsBy        String?   @map("tags_by")
+  aiReason      String?   @map("ai_reason")
+  // Claude's read: what the customer wants, and 0-100 chance they sign up. insightBy covers both.
+  intent        String?
+  signupChance  Int?      @map("signup_chance")
+  insightBy     String?   @map("insight_by")
+  classifiedAt  DateTime? @map("classified_at")
+  // Claude auto-reply (Dualhook). Off once a human replies or the customer sends documents.
+  aiEnabled      Boolean   @default(true) @map("ai_enabled")
+  aiPausedReason String?   @map("ai_paused_reason")
+  aiPausedAt     DateTime? @map("ai_paused_at")
+
+  @@index([lastMessageAt])
+  @@map("whatsapp_conversations")
+}
+
+// One row: the model that sorts chats. Null = WHATSAPP_CRM_MODEL, else Haiku 5.5.
+model WhatsappCrmSettings {
+  id        Int      @id @default(1)
+  model     String?
+  // The AI's knowledge document: text, or a PDF as base64 (knowledgeMime says which).
+  knowledgeName      String?   @map("knowledge_name")
+  knowledgeMime      String?   @map("knowledge_mime")
+  knowledgeDoc       String?   @map("knowledge_doc")
+  knowledgeUpdatedAt DateTime? @map("knowledge_updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("whatsapp_crm_settings")
+}
+
+// One row per WhatsApp message (live, imported history, or sent from BizzFlow).
+// whatsapp_webhook_events stays the raw log; the inbox reads this table.
+model WhatsappMessage {
+  messageId String   @id @map("message_id")
+  waId      String   @map("wa_id")
+  fromMe    Boolean  @map("from_me")
+  type      String
+  text      String
+  media     Json?
+  status    String?
+  error     String?
+  // live | history | bizzflow
+  source    String
+  byAi      Boolean  @default(false) @map("by_ai")
+  sentAt    DateTime @map("sent_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([waId, sentAt])
+  @@map("whatsapp_messages")
+}
+
+// In-app alerts for the WhatsApp team. kind: documents.
+model WhatsappAlert {
+  id        String    @id @default(cuid())
+  waId      String    @map("wa_id")
+  kind      String
+  message   String
+  createdAt DateTime  @default(now()) @map("created_at")
+  seenAt    DateTime? @map("seen_at")
+
+  @@index([createdAt])
+  @@map("whatsapp_alerts")
+}
+
+// Admin-edited CRM lists. kind: stage | folder | tag. `description` is what
+// Claude reads to decide when a label applies.
+model WhatsappLabel {
+  id          String   @id @default(cuid())
+  kind        String
+  name        String
+  description String   @default("")
+  color       String   @default("gray")
+  sort        Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([kind, name])
+  @@map("whatsapp_labels")
+}

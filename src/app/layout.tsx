@@ -1,0 +1,69 @@
+import type { Metadata, Viewport } from "next";
+import { Geist, Inter, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/providers";
+import { DESIGN_INIT_SCRIPT } from "@/lib/design";
+import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+// Arc's display face (headings in the Arc design). The CSS variable name is the one Arc's foundation reads.
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+export const metadata: Metadata = {
+  title: "BizzFlow AI Chatbot",
+  description: "WhatsApp inbox and AI assistant for BizzFlow",
+  // Icons come from the file conventions in this directory — favicon.ico,
+  // icon.png and apple-icon.png. An `icons` field here would override them.
+  appleWebApp: {
+    title: "BizzFlow AI Chatbot",
+    capable: true,
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#635BFF",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${inter.variable} ${geist.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      // Arc is the default design; the script below removes these before first paint
+      // for a viewer who chose Classic, and sets their stored Arc accent otherwise.
+      data-design="arc"
+      data-accent="neutral"
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: DESIGN_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
+      </body>
+    </html>
+  );
+}
