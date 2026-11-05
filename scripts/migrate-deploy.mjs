@@ -33,9 +33,32 @@ const isWin = process.platform === "win32";
 const local = path.join(process.cwd(), "node_modules", ".bin", isWin ? "prisma.cmd" : "prisma");
 const cmd = fs.existsSync(local) ? local : "prisma";
 
-const res = spawnSync(cmd, ["migrate", "deploy"], { stdio: "inherit", shell: isWin });
-if (res.error) {
-  console.error(`Could not run ${cmd}:`, res.error.message);
-  process.exit(1);
+// The first production build ran the init migration while its line 1 was CLI log text.
+// Postgres refused that line before any statement ran, so the database holds nothing from
+// it, but Prisma recorded the migration as failed (P3009) and refuses every later deploy.
+// Mark only that migration as rolled back, then deploy again. Any other failure stays fatal.
+const BROKEN_INIT = "20261105120000_init";
+
+function deploy() {
+  const res = spawnSync(cmd, ["migrate", "deploy"], { encoding: "utf8", shell: isWin });
+  if (res.error) {
+    console.error(`Could not run ${cmd}:`, res.error.message);
+    process.exit(1);
+  }
+  process.stdout.write(res.stdout ?? "");
+  process.stderr.write(res.stderr ?? "");
+  return res;
+}
+
+let res = deploy();
+const out = `${res.stdout}${res.stderr}`;
+if (res.status !== 0 && out.includes("P3009") && out.includes(`\`${BROKEN_INIT}\``)) {
+  console.log(`Marking ${BROKEN_INIT} as rolled back (it failed on line 1), then deploying again.`);
+  const fix = spawnSync(cmd, ["migrate", "resolve", "--rolled-back", BROKEN_INIT], {
+    stdio: "inherit",
+    shell: isWin,
+  });
+  if (fix.status !== 0) process.exit(fix.status ?? 1);
+  res = deploy();
 }
 process.exit(res.status ?? 1);
