@@ -1,0 +1,930 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "../components/arc/foundation.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-fade-in-up: fade-in-up 0.5s ease-out both;
+  --animate-fade-in-down: fade-in-down 0.4s ease-out both;
+  --animate-fade-in-left: fade-in-left 0.4s ease-out both;
+  --animate-fade-in-right: fade-in-right 0.4s ease-out both;
+  --animate-scale-in: scale-in 0.3s ease-out both;
+  --animate-slide-up: slide-up 0.4s ease-out both;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-count-up: count-up 0.6s ease-out both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(99, 91, 255, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(99, 91, 255, 0.6); }
+}
+.progress-bar-glow {
+  animation: progress-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes draw-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes grow-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes chart-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin-in {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes map-state-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes number-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes progress-fill {
+  from { width: 0; }
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes legend-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes drawCheck {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+@theme inline {
+  /* BizzFlow palette. Components use these names (text-ink, bg-brand, border-line…) instead of hex,
+     so the design toggle can repaint every screen: classic values in :root, Arc values under [data-design="arc"]. */
+  --color-brand: var(--bf-brand);
+  --color-brand-strong: var(--bf-brand-strong);
+  --color-brand-wash: var(--bf-brand-wash);
+  --color-ink: var(--bf-ink);
+  --color-ink-soft: var(--bf-ink-soft);
+  --color-ink-muted: var(--bf-ink-muted);
+  --color-ink-faint: var(--bf-ink-faint);
+  --color-line: var(--bf-line);
+  --color-line-strong: var(--bf-line-strong);
+  --color-wash: var(--bf-wash);
+  --color-danger: var(--bf-danger);
+  --font-heading: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'Roboto Mono', monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Classic (Stripe-inspired) BizzFlow palette. */
+  --bf-brand: #635BFF;
+  --bf-brand-strong: #5851DB;
+  --bf-brand-wash: #EDEBFF;
+  --bf-ink: #0A2540;
+  --bf-ink-soft: #425466;
+  --bf-ink-muted: #697386;
+  --bf-ink-faint: #8792A2;
+  --bf-line: #E3E8EF;
+  --bf-line-strong: #CBD2DC;
+  --bf-wash: #F6F9FC;
+  --bf-danger: #DF1B41;
+  /* Stripe-inspired palette */
+  --background: #FFFFFF;
+  --foreground: #0A2540;
+  --card: #FFFFFF;
+  --card-foreground: #0A2540;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A2540;
+  --primary: #635BFF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F6F9FC;
+  --secondary-foreground: #0A2540;
+  --muted: #F6F9FC;
+  --muted-foreground: #697386;
+  --accent: #F6F9FC;
+  --accent-foreground: #0A2540;
+  --destructive: #DF1B41;
+  --border: #E3E8EF;
+  --input: #E3E8EF;
+  --ring: #635BFF;
+  --chart-1: #635BFF;
+  --chart-2: #0A2540;
+  --chart-3: #09825D;
+  --chart-4: #DF1B41;
+  --chart-5: #697386;
+  --radius: 0.625rem;
+  --sidebar: #F6F9FC;
+  --sidebar-foreground: #425466;
+  --sidebar-primary: #635BFF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E3E8EF;
+  --sidebar-accent-foreground: #0A2540;
+  --sidebar-border: #E3E8EF;
+  --sidebar-ring: #635BFF;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--bf-ink);
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Stripe-style tabular figures for numeric data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Stagger animation delays for children */
+.stagger-children > * { animation-fill-mode: both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+
+/* Hover lift effect for cards */
+.hover-lift {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Hover glow for primary buttons */
+.hover-glow {
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+.hover-glow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(99, 91, 255, 0.3);
+}
+.hover-glow:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(99, 91, 255, 0.2);
+}
+
+/* Subtle press effect for interactive elements */
+.press-effect {
+  transition: transform 100ms ease;
+}
+.press-effect:active {
+  transform: scale(0.97);
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.80 0 0);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0 0);
+}
+
+/* Chart container entrance */
+.chart-enter {
+  animation: chart-fade-in 0.6s ease-out both;
+}
+
+/* Donut chart spin-in */
+.donut-enter {
+  animation: spin-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: center;
+}
+
+/* Map state entrance stagger */
+.map-state-enter {
+  animation: map-state-in 0.5s ease-out both;
+}
+
+/* Table row stagger */
+.row-stagger > tr {
+  animation: row-fade-in 0.3s ease-out both;
+}
+.row-stagger > tr:nth-child(1) { animation-delay: 0ms; }
+.row-stagger > tr:nth-child(2) { animation-delay: 30ms; }
+.row-stagger > tr:nth-child(3) { animation-delay: 60ms; }
+.row-stagger > tr:nth-child(4) { animation-delay: 90ms; }
+.row-stagger > tr:nth-child(5) { animation-delay: 120ms; }
+.row-stagger > tr:nth-child(6) { animation-delay: 150ms; }
+.row-stagger > tr:nth-child(7) { animation-delay: 180ms; }
+.row-stagger > tr:nth-child(8) { animation-delay: 210ms; }
+.row-stagger > tr:nth-child(9) { animation-delay: 240ms; }
+.row-stagger > tr:nth-child(10) { animation-delay: 270ms; }
+
+/* Number pop animation for KPI values */
+.number-pop {
+  animation: number-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Progress bar fill animation */
+.progress-fill {
+  animation: progress-fill 0.8s ease-out both;
+}
+
+/* Legend items stagger */
+.legend-stagger > * {
+  animation: legend-pop 0.3s ease-out both;
+}
+.legend-stagger > *:nth-child(1) { animation-delay: 400ms; }
+.legend-stagger > *:nth-child(2) { animation-delay: 450ms; }
+.legend-stagger > *:nth-child(3) { animation-delay: 500ms; }
+.legend-stagger > *:nth-child(4) { animation-delay: 550ms; }
+.legend-stagger > *:nth-child(5) { animation-delay: 600ms; }
+.legend-stagger > *:nth-child(6) { animation-delay: 650ms; }
+.legend-stagger > *:nth-child(7) { animation-delay: 700ms; }
+.legend-stagger > *:nth-child(8) { animation-delay: 750ms; }
+
+/* Tooltip entrance */
+.tooltip-enter {
+  animation: scale-in 0.15s ease-out both;
+  transform-origin: top left;
+}
+
+/* Chart hover glow */
+.chart-card-hover {
+  transition: box-shadow 300ms ease, transform 200ms ease;
+}
+.chart-card-hover:hover {
+  box-shadow: 0 8px 30px rgba(99, 91, 255, 0.08);
+}
+
+/* Dot pulse for loading indicators */
+.dot-pulse {
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+.dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+
+/* Native <select> with a custom chevron so we control its right margin. */
+.select-chevron {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23697386' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 2.5rem;
+}
+
+/* ── Order Entry: address confirm feedback ───────────────────────────────── */
+
+/* Indeterminate progress bar for the portal address check — the portal gives
+   no percentage, so the bar reports "working", not "how far". */
+@keyframes indeterminate-bar {
+  0%   { transform: translateX(-100%) scaleX(0.4); }
+  50%  { transform: translateX(20%)  scaleX(0.6); }
+  100% { transform: translateX(220%) scaleX(0.4); }
+}
+.progress-indeterminate {
+  animation: indeterminate-bar 1.4s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+/* One-shot highlight on a field the moment Confirm auto-fills it, so the agent
+   can see which values the system derived rather than silently swapping them. */
+@keyframes field-flash {
+  0%   { background-color: rgba(99, 91, 255, 0.14); border-color: #635BFF; }
+  100% { background-color: transparent; border-color: #E3E8EF; }
+}
+.field-flash {
+  animation: field-flash 900ms ease-out both;
+}
+
+/* ── Drafts list: portal-verified address badge ──────────────────────────── */
+
+/* A soft green halo that breathes slowly, so a verified address reads as a live
+   portal-confirmed fact without competing with the row's Submit button. The
+   tick draws itself once on mount as the badge appears. */
+/* No halo, no loop. Verification is the normal state for a confirmed address,
+   so a pulsing ring on nearly every row is permanent visual noise — and it
+   trains the eye to skip exactly the mark whose absence is the signal. The
+   check still draws itself once, which is enough. */
+.badge-verified svg path {
+  stroke-dasharray: 24;
+  animation: drawCheck 500ms ease-out 120ms both;
+}
+
+/* ── Order Entry: submit timeline ────────────────────────────────────────── */
+
+/* The rail segment above a step draws downward the moment that step completes,
+   so progress reads as movement along one line rather than 16 ticks flipping
+   independently. The class is only present on completed segments, so adding it
+   is what starts the animation — it plays once per step, not on every poll. */
+@keyframes rail-draw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.rail-draw {
+  animation: rail-draw 400ms ease-out both;
+  transform-origin: top center;
+}
+
+/* The step being worked on: a slow halo that breathes outward. Deliberately
+   softer than a spinner — the run can sit on one step for minutes and a
+   spinning element that long reads as "stuck". */
+@keyframes step-halo {
+  0%   { box-shadow: 0 0 0 0 rgba(99, 91, 255, 0.4); }
+  70%  { box-shadow: 0 0 0 5px rgba(99, 91, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 91, 255, 0); }
+}
+.step-live {
+  animation: step-halo 2s ease-in-out infinite;
+}
+
+/* Completed / stopped markers pop in once as their state lands. */
+.step-mark {
+  animation: scaleIn 260ms ease-out both;
+}
+.step-mark-check path {
+  stroke-dasharray: 24;
+  animation: drawCheck 420ms ease-out 80ms both;
+}
+
+/* Rows arrive top-down on first paint so the list assembles as a sequence. */
+@keyframes step-row-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.step-row-in {
+  animation: step-row-in 300ms ease-out both;
+}
+
+/* ── Detail panel motion ─────────────────────────────────────────────────────
+   Every entrance below uses animation-fill-mode: BACKWARDS, never `both`.
+   `both` holds the to-state after the animation ends, and a resolved
+   `transform: none` is still an identity matrix — which makes the element a
+   stacking context forever and lets it paint over an open dropdown. That bug
+   cost a day on the address-confirm work; `backwards` applies the from-state
+   during the stagger delay and then leaves NO transform behind at all.       */
+
+@keyframes panel-item-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.panel-item-in {
+  animation: panel-item-in 320ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Stat cards rise a little further than text, so the grid reads as one object
+   arriving rather than three independent lines. */
+@keyframes panel-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.panel-card-in {
+  animation: panel-card-in 380ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* A step marker earns a pop only at the moment it resolves. */
+@keyframes marker-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.marker-pop {
+  animation: marker-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* The resolved value APPEARING is the event worth animating, not the row. */
+@keyframes detail-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: none; }
+}
+.detail-in {
+  animation: detail-in 240ms ease-out backwards;
+}
+
+/* Attempt bodies expand to their measured height. This is the ONE place the
+   panel animates a layout property — Base UI measures the panel and exposes it
+   as --collapsible-panel-height, which is the only way to transition to "auto".
+   It is confined to a collapsed region no other element depends on. */
+.collapse-panel {
+  overflow: hidden;
+  height: var(--collapsible-panel-height);
+  transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.collapse-panel[data-starting-style],
+.collapse-panel[data-ending-style] {
+  height: 0;
+}
+
+/* Tab bodies cross-fade; sliding them would fight the sheet's own entrance. */
+@keyframes tab-panel-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+.tab-panel-in {
+  animation: tab-panel-in 180ms ease-out backwards;
+}
+
+/* Respect the OS "reduce motion" setting across the whole app: keep state
+   changes instant instead of animating them, but never hide content (the
+   entrance animations use fill-mode both, so they must still resolve). */
+/* ── Document combine ────────────────────────────────────────────────────────
+   A combine replaces the files it merged, so the list changes under the agent.
+   These two make that legible: the merged rows collapse away in place, and the
+   combined row that takes their position announces itself once.
+
+   Both are animations rather than transitions so the global reduced-motion block
+   above collapses them to 0.01ms — the row still leaves and still arrives, just
+   without the movement. */
+@keyframes doc-collapse {
+  from {
+    opacity: 1;
+    max-height: 44px;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes doc-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    box-shadow: 0 0 0 0 rgba(99, 91, 255, 0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.28);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 rgba(99, 91, 255, 0);
+  }
+}
+
+.doc-collapsing {
+  animation: doc-collapse 260ms ease-in forwards;
+  overflow: hidden;
+}
+
+.doc-arriving {
+  animation: doc-arrive 900ms ease-out both;
+}
+
+/* One-shot attention flashes — used by useFlashOnChange. Motion that carries
+   information: the pill whose STATUS changed, the badge that just went green.
+   Both are inside the reduced-motion block's blanket disable, like every other
+   animation here. */
+@keyframes pill-flash {
+  0% { box-shadow: 0 0 0 0 rgba(99, 91, 255, 0.55); }
+  100% { box-shadow: 0 0 0 8px rgba(99, 91, 255, 0); }
+}
+.animate-pill-flash { animation: pill-flash 0.7s ease-out 1; }
+
+/* ZenGarden sign-in mark — the enso circle draws, the sand ripples rake
+   across, the stone settles. The BASE state is the finished mark and the
+   animation runs FROM the undrawn offset with `backwards` fill, so
+   reduced-motion's near-zero duration lands on the drawn logo, never an
+   empty panel. */
+.zen-draw {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  animation: zen-draw 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+@keyframes zen-draw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+.zen-stone {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: zen-settle 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+@keyframes zen-settle {
+  0% { opacity: 0; transform: scale(0); }
+  60% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.zen-breathe { animation: zen-breathe 6s ease-in-out 2.4s infinite; }
+@keyframes zen-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .progress-indeterminate {
+    animation: none;
+    transform: scaleX(1);
+  }
+  .step-live {
+    animation: none;
+  }
+  .rail-draw {
+    animation: none;
+    transform: scaleY(1);
+  }
+  /* The panel entrances are `backwards`, so killing the animation outright
+     leaves the element in its natural state — visible, unmoved. The duration
+     override above would already do this; naming them keeps it explicit that
+     the whole panel choreography is covered. */
+  .panel-item-in,
+  .panel-card-in,
+  .marker-pop,
+  .detail-in,
+  .tab-panel-in {
+    animation: none;
+  }
+  /* Snap open/closed instead of sliding the height. */
+  .collapse-panel {
+    transition: none;
+  }
+}
+
+/* ── Arc design (uiarc.dev) ────────────────────────────────────────────────
+   The design toggle sets data-design="arc" on <html>. Arc's own tokens come from
+   src/components/arc/foundation.css; this block points BizzFlow's palette and the
+   shadcn tokens at them, so every existing screen repaints without a second copy
+   of any component. Same selector weight as the foundation, and later, so it wins. */
+:is(:root[data-design="arc"], [data-design="arc"]) {
+  --bf-brand: var(--arc-accent);
+  --bf-brand-strong: var(--arc-accent-strong);
+  --bf-brand-wash: var(--arc-accent-subtle);
+  --bf-ink: var(--foreground);
+  --bf-ink-soft: var(--text-secondary);
+  --bf-ink-muted: var(--text-secondary);
+  --bf-ink-faint: var(--text-muted);
+  --bf-line: var(--border);
+  --bf-line-strong: var(--border-strong);
+  --bf-wash: var(--surface-muted);
+  --bf-danger: var(--danger);
+
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--foreground);
+  --primary: var(--arc-accent);
+  --primary-foreground: var(--arc-accent-foreground);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--surface-muted);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--danger);
+  --input: var(--border);
+  --ring: var(--arc-accent);
+  --chart-1: var(--series-1);
+  --chart-2: var(--series-2);
+  --chart-3: var(--series-3);
+  --chart-4: var(--series-4);
+  --chart-5: var(--text-muted);
+  --radius: 0.875rem;
+  --sidebar: var(--surface-muted);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--arc-accent);
+  --sidebar-primary-foreground: var(--arc-accent-foreground);
+  --sidebar-accent: var(--border);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--arc-accent);
+  /* Arc ships without focus rings; BizzFlow keeps a visible one for keyboard users. */
+  --focus-ring: color-mix(in oklch, var(--arc-accent) 40%, transparent);
+  font-family: var(--font-body);
+  letter-spacing: var(--tracking-body);
+}
+
+/* Text on a brand fill uses the accent's own foreground: white on dark accents, dark on
+   light ones (amber, green, and every accent in dark mode). Classic keeps its text-white. */
+:is(:root[data-design="arc"], [data-design="arc"]) .bg-brand {
+  color: var(--arc-accent-foreground);
+}
+
+/* Headings take Arc's display face and tracking. */
+:is(:root[data-design="arc"], [data-design="arc"]) :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+}
+
+/* Arc's press: a short scale on the standard ease, on every shadcn button. */
+:is(:root[data-design="arc"], [data-design="arc"]) [data-slot="button"] {
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-instant) var(--ease-standard);
+}
+:is(:root[data-design="arc"], [data-design="arc"]) [data-slot="button"]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Floating layers get Arc's soft, deep shadows. */
+:is(:root[data-design="arc"], [data-design="arc"])
+  :is([data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"]) {
+  box-shadow: var(--shadow-floating);
+  border-radius: var(--radius-panel);
+}
+/* Arc sizes a select's list to its trigger. The app's filter selects are compact, so the list
+   may grow to its longest option instead of wrapping it ("All / Statuses"). */
+:is(:root[data-design="arc"], [data-design="arc"]) [role="listbox"][data-state] {
+  width: max-content;
+}
+:is(:root[data-design="arc"], [data-design="arc"]) :focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(:root[data-design="arc"], [data-design="arc"]) [data-slot="button"]:active {
+    transform: none;
+  }
+}
