@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { whatsappFixtureEnabled, whatsappFixtureEvents } from "@/lib/whatsapp-inbox-fixture";
 import { buildInbox, unreadFor, type ChatSummary, type ConversationState, type InboxMessage, type Label } from "@/lib/whatsapp-inbox";
 import { ingestWebhook, listChatSummaries, listThread } from "@/lib/whatsapp-store";
+import type { InboxPulse } from "@/lib/whatsapp-sync";
 import { directionLabel, extractWhatsappEvent, type WhatsappExtract } from "@/lib/whatsapp-webhook";
 
 
@@ -173,9 +174,18 @@ export async function updateConversation(
   });
 }
 
-/** When the newest WhatsApp webhook event reached this app. null = none stored (or fixture mode). */
-export async function lastWebhookAt(): Promise<string | null> {
-  if (whatsappFixtureEnabled()) return new Date().toISOString();
-  const row = await prisma.whatsappWebhookEvent.findFirst({ orderBy: { receivedAt: "desc" }, select: { receivedAt: true } });
-  return row?.receivedAt.toISOString() ?? null;
+/**
+ * The inbox health signal. messageAt: the newest customer message (a real one, not a test ping or status).
+ * eventAt: the newest raw webhook of any kind. null = none stored.
+ */
+export async function inboxPulse(): Promise<InboxPulse> {
+  if (whatsappFixtureEnabled()) {
+    const now = new Date().toISOString();
+    return { messageAt: now, eventAt: now };
+  }
+  const [message, event] = await Promise.all([
+    prisma.whatsappMessage.findFirst({ where: { fromMe: false }, orderBy: { sentAt: "desc" }, select: { sentAt: true } }),
+    prisma.whatsappWebhookEvent.findFirst({ orderBy: { receivedAt: "desc" }, select: { receivedAt: true } }),
+  ]);
+  return { messageAt: message?.sentAt.toISOString() ?? null, eventAt: event?.receivedAt.toISOString() ?? null };
 }
