@@ -1,6 +1,11 @@
 /** Pure helpers for the inbox sync status. Safe to import in client components. */
 
-/** After this long with no webhook, the inbox warns that new messages may not be arriving. */
+export interface InboxPulse {
+  messageAt: string | null;
+  eventAt: string | null;
+}
+
+/** After this long with no customer message, the inbox warns that new messages may not be arriving. */
 export const WEBHOOK_QUIET_MS = 6 * 60 * 60 * 1000;
 
 export type WebhookHealth = "live" | "quiet" | "none";

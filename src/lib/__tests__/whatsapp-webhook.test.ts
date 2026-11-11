@@ -42,6 +42,9 @@ vi.mock("@/lib/prisma", () => ({
     whatsappConversation: {
       findMany: async () => [],
     },
+    whatsappMessage: {
+      findFirst: async () => ({ sentAt: new Date("2026-11-01T00:00:00Z") }),
+    },
     whatsappLabel: {
       findMany: async () => [],
     },
@@ -425,7 +428,7 @@ describe("admin list", () => {
     const res = await adminList(new Request("http://localhost/api/inbox?q=hours"));
     expect(res.status).toBe(200);
     expect(listChatSummaries).toHaveBeenCalledWith("hours");
-    expect(await res.json()).toEqual({ chats: [{ customer: "15551110000" }], labels: [], webhookAt: "2026-11-01T00:00:00.000Z" });
+    expect(await res.json()).toEqual({ chats: [{ customer: "15551110000" }], labels: [], pulse: { messageAt: "2026-11-01T00:00:00.000Z", eventAt: "2026-11-01T00:00:00.000Z" } });
   });
 
   it("refuses a malformed chat id", async () => {

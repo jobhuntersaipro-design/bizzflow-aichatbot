@@ -25,6 +25,7 @@ import { Input } from "@/components/arc/components/input/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SyncStatus } from "@/components/inbox/sync-status";
+import type { InboxPulse } from "@/lib/whatsapp-sync";
 import {
   contactName,
   isClosed,
@@ -49,12 +50,12 @@ type Transport = "dualhook" | "gateway";
 export function WhatsappDesk({
   initialChats,
   initialLabels,
-  initialWebhookAt,
+  initialPulse,
   transport,
 }: {
   initialChats: ChatSummary[];
   initialLabels: Label[];
-  initialWebhookAt: string | null;
+  initialPulse: InboxPulse;
   /** dualhook: Meta Coexistence through Dualhook (Claude replies, 24h window). gateway: the QR-linked device. */
   transport: Transport;
 }) {
@@ -105,7 +106,7 @@ export function WhatsappDesk({
             No WhatsApp number linked. Scan the QR above; the linked number&apos;s chats load here.
           </p>
         ) : (
-          <WhatsappInbox initialChats={initialChats} initialWebhookAt={initialWebhookAt} labels={labels} onLabels={setLabels} connected={connected === true} transport={transport} />
+          <WhatsappInbox initialChats={initialChats} initialPulse={initialPulse} labels={labels} onLabels={setLabels} connected={connected === true} transport={transport} />
         )}
         </>
       ) : (
@@ -129,14 +130,14 @@ const NO_FILTER: ChatFilter = { folderId: null, stageId: null, tagId: null };
 
 function WhatsappInbox({
   initialChats,
-  initialWebhookAt,
+  initialPulse,
   labels,
   onLabels,
   connected,
   transport,
 }: {
   initialChats: ChatSummary[];
-  initialWebhookAt: string | null;
+  initialPulse: InboxPulse;
   labels: Label[];
   onLabels: (labels: Label[]) => void;
   connected: boolean;
@@ -148,7 +149,7 @@ function WhatsappInbox({
   const [refreshing, setRefreshing] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncedAt, setSyncedAt] = useState<number | null>(null);
-  const [webhookAt, setWebhookAt] = useState(initialWebhookAt);
+  const [pulse, setPulse] = useState(initialPulse);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<InboxTab>("open");
   const [filter, setFilter] = useState<ChatFilter>(NO_FILTER);
@@ -193,9 +194,9 @@ function WhatsappInbox({
         setError("Could not refresh chats.");
         return;
       }
-      const data = (await res.json()) as { chats: ChatSummary[]; labels: Label[]; webhookAt?: string | null };
+      const data = (await res.json()) as { chats: ChatSummary[]; labels: Label[]; pulse?: InboxPulse };
       setChats(data.chats);
-      setWebhookAt(data.webhookAt ?? null);
+      if (data.pulse) setPulse(data.pulse);
       setSyncedAt(Date.now());
       onLabels(data.labels);
       setError(null);
@@ -359,7 +360,7 @@ function WhatsappInbox({
       syncing={syncing}
       syncedAt={syncedAt}
       error={error}
-      webhookAt={transport === "dualhook" ? webhookAt : undefined}
+      pulse={transport === "dualhook" ? pulse : undefined}
       pollMs={POLL_MS}
       onRefresh={() => void load(true)}
       refreshing={refreshing}
