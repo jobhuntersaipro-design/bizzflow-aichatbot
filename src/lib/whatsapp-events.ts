@@ -172,3 +172,10 @@ export async function updateConversation(
     update: patch,
   });
 }
+
+/** When the newest WhatsApp webhook event reached this app. null = none stored (or fixture mode). */
+export async function lastWebhookAt(): Promise<string | null> {
+  if (whatsappFixtureEnabled()) return new Date().toISOString();
+  const row = await prisma.whatsappWebhookEvent.findFirst({ orderBy: { receivedAt: "desc" }, select: { receivedAt: true } });
+  return row?.receivedAt.toISOString() ?? null;
+}

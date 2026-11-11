@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentAgent } from "@/lib/agent-gate";
-import { getThread, listChats, listLabels } from "@/lib/whatsapp-events";
+import { getThread, lastWebhookAt, listChats, listLabels } from "@/lib/whatsapp-events";
 import { whatsappFixtureEnabled } from "@/lib/whatsapp-inbox-fixture";
 import { backfillFromEvents } from "@/lib/whatsapp-store";
 
@@ -23,6 +23,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ messages: await getThread(chat) });
   }
   if (!whatsappFixtureEnabled()) await backfillFromEvents();
-  const [chats, labels] = await Promise.all([listChats(url.searchParams.get("q") ?? ""), listLabels()]);
-  return NextResponse.json({ chats, labels });
+  const [chats, labels, webhookAt] = await Promise.all([listChats(url.searchParams.get("q") ?? ""), listLabels(), lastWebhookAt()]);
+  return NextResponse.json({ chats, labels, webhookAt });
 }

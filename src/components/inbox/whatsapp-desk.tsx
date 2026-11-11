@@ -18,6 +18,13 @@ import {
 } from "@/actions/whatsapp";
 import { ChevronRight, Loader2, Sparkles } from "lucide-react";
 import { Progress as ArcProgress } from "@/components/arc/components/progress/progress";
+import SegmentedControl from "@/components/arc/components/segmented-control/segmented-control";
+import { Avatar as ArcAvatar } from "@/components/arc/components/avatar/avatar";
+import { Badge } from "@/components/arc/components/badge/badge";
+import { Input } from "@/components/arc/components/input/input";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { SyncStatus } from "@/components/inbox/sync-status";
 import {
   contactName,
   isClosed,
@@ -42,10 +49,12 @@ type Transport = "dualhook" | "gateway";
 export function WhatsappDesk({
   initialChats,
   initialLabels,
+  initialWebhookAt,
   transport,
 }: {
   initialChats: ChatSummary[];
   initialLabels: Label[];
+  initialWebhookAt: string | null;
   /** dualhook: Meta Coexistence through Dualhook (Claude replies, 24h window). gateway: the QR-linked device. */
   transport: Transport;
 }) {
@@ -69,34 +78,34 @@ export function WhatsappDesk({
             Chats from the linked number, sorted into lead stages by AI. Replies send from the business number.
           </p>
         </div>
-        <div className="flex rounded-lg border border-line bg-white p-0.5">
-          <ViewButton current={view} id="inbox" onSelect={setView}>Inbox</ViewButton>
-          <ViewButton current={view} id="settings" onSelect={setView}>Settings</ViewButton>
-        </div>
+        <SegmentedControl
+          label="View"
+          value={view}
+          onValueChange={(v) => setView(v as View)}
+          options={[{ value: "inbox", label: "Inbox" }, { value: "settings", label: "Settings" }]}
+        />
       </div>
-      {transport === "dualhook" ? (
-        <p className="rounded-lg border border-line bg-white px-4 py-3 text-sm text-ink">
-          Connected through Dualhook (WhatsApp Coexistence). Messages from the phone app show here too.
-        </p>
-      ) : (
-        <WhatsappConnection onConnectedChange={setConnected} />
-      )}
+      {transport === "gateway" && <WhatsappConnection onConnectedChange={setConnected} />}
       {view === "inbox" ? (
         <>
         {transport === "dualhook" && <WhatsappAlerts />}
-        <p className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-          <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
-          <span>
-            AI analyses each chat automatically 3 minutes after the customer&apos;s last message (lead stage, summary and sign-up chance).
-            Press <strong>AI Analysis</strong> on a chat to run it now. Stages you set by hand are kept until you choose &quot;Let AI manage&quot;.
-          </span>
-        </p>
+        <details className="group rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink-muted">
+          <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-ink">
+            <Sparkles className="size-4 shrink-0" aria-hidden />
+            How AI sorts chats
+            <ChevronRight className="size-3.5 transition-transform group-open:rotate-90" aria-hidden />
+          </summary>
+          <p className="mt-1.5">
+            AI analyses each chat 3 minutes after the customer&apos;s last message (lead stage, summary and sign-up chance).
+            Press <strong>AI Analysis</strong> on a chat to run it now. Stages you set by hand stay until you choose &quot;Let AI manage&quot;.
+          </p>
+        </details>
         {connected === false ? (
           <p className="rounded-lg border border-line bg-white px-4 py-10 text-center text-sm text-ink-muted">
             No WhatsApp number linked. Scan the QR above; the linked number&apos;s chats load here.
           </p>
         ) : (
-          <WhatsappInbox initialChats={initialChats} labels={labels} onLabels={setLabels} connected={connected === true} transport={transport} />
+          <WhatsappInbox initialChats={initialChats} initialWebhookAt={initialWebhookAt} labels={labels} onLabels={setLabels} connected={connected === true} transport={transport} />
         )}
         </>
       ) : (
@@ -106,20 +115,6 @@ export function WhatsappDesk({
         </>
       )}
     </div>
-  );
-}
-
-function ViewButton({ current, id, onSelect, children }: { current: View; id: View; onSelect: (id: View) => void; children: string }) {
-  const on = current === id;
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={() => onSelect(id)}
-      className={`rounded-md px-3 py-1.5 text-sm font-medium ${on ? "bg-ink text-white" : "text-ink-muted hover:text-ink"}`}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -134,12 +129,14 @@ const NO_FILTER: ChatFilter = { folderId: null, stageId: null, tagId: null };
 
 function WhatsappInbox({
   initialChats,
+  initialWebhookAt,
   labels,
   onLabels,
   connected,
   transport,
 }: {
   initialChats: ChatSummary[];
+  initialWebhookAt: string | null;
   labels: Label[];
   onLabels: (labels: Label[]) => void;
   connected: boolean;
@@ -149,6 +146,9 @@ function WhatsappInbox({
   const [threads, setThreads] = useState<Record<string, InboxMessage[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<number | null>(null);
+  const [webhookAt, setWebhookAt] = useState(initialWebhookAt);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<InboxTab>("open");
   const [filter, setFilter] = useState<ChatFilter>(NO_FILTER);
@@ -182,6 +182,7 @@ function WhatsappInbox({
 
   const load = useCallback(async (manual: boolean) => {
     if (manual) setRefreshing(true);
+    setSyncing(true);
     try {
       const res = await fetch(`/api/inbox?q=${encodeURIComponent(queryRef.current)}`, { cache: "no-store" });
       if (res.status === 401) {
@@ -192,8 +193,10 @@ function WhatsappInbox({
         setError("Could not refresh chats.");
         return;
       }
-      const data = (await res.json()) as { chats: ChatSummary[]; labels: Label[] };
+      const data = (await res.json()) as { chats: ChatSummary[]; labels: Label[]; webhookAt?: string | null };
       setChats(data.chats);
+      setWebhookAt(data.webhookAt ?? null);
+      setSyncedAt(Date.now());
       onLabels(data.labels);
       setError(null);
       const open = selectedRef.current && data.chats.find((c) => c.customer === selectedRef.current);
@@ -204,6 +207,7 @@ function WhatsappInbox({
     } catch {
       setError("Could not refresh chats.");
     } finally {
+      setSyncing(false);
       if (manual) setRefreshing(false);
     }
   }, [loadThread, markRead, onLabels]);
@@ -305,9 +309,9 @@ function WhatsappInbox({
           type="button"
           onClick={() => select(chat)}
           aria-current={on ? "true" : undefined}
-          className={`flex w-full gap-3 border-b border-line/60 px-3 py-3 text-left hover:bg-wash ${on ? "bg-wash" : ""}`}
+          className={`flex w-full gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-wash ${on ? "bg-wash" : ""}`}
         >
-          <Avatar waId={chat.customer} name={name} />
+          <ArcAvatar name={name ?? chat.customer.slice(-2).split("").join(" ")} src={`/api/inbox/avatar?wa=${chat.customer}`} />
           <span className="block min-w-0 flex-1">
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate text-sm font-medium text-ink">{name ?? <span className="font-mono">+{chat.customer}</span>}</span>
@@ -317,11 +321,11 @@ function WhatsappInbox({
           <span className="mt-1 flex items-center justify-between gap-2">
             <span className="truncate text-sm text-ink-muted">{chat.preview}</span>
             {chat.unread > 0 ? (
-              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#25D366] px-1.5 text-[11px] font-semibold text-white">
+              <Badge tone="success" size="sm" pill className="shrink-0">
                 {chat.unread > 99 ? "99+" : chat.unread}<span className="sr-only"> new messages</span>
-              </span>
+              </Badge>
             ) : isClosed(chat.lastInboundAt, chat.closedAt) ? (
-              <span className="shrink-0 rounded-full bg-wash px-1.5 py-0.5 text-[11px] font-medium text-ink-muted">Closed</span>
+              <Badge size="sm" pill className="shrink-0">Closed</Badge>
             ) : null}
           </span>
           {stage && (
@@ -350,59 +354,49 @@ function WhatsappInbox({
   ) : null;
 
   return (
-    <div className="flex h-[calc(100dvh-11rem)] min-h-[24rem] overflow-hidden rounded-lg border border-line bg-white md:h-[calc(100dvh-13rem)]">
-      <section className={`${active ? "hidden md:flex" : "flex"} w-full min-w-0 flex-col border-line md:w-80 md:shrink-0 md:border-r`}>
+    <div className="space-y-2">
+    <SyncStatus
+      syncing={syncing}
+      syncedAt={syncedAt}
+      error={error}
+      webhookAt={transport === "dualhook" ? webhookAt : undefined}
+      pollMs={POLL_MS}
+      onRefresh={() => void load(true)}
+      refreshing={refreshing}
+    />
+    <div className="flex h-[calc(100dvh-13rem)] min-h-[24rem] overflow-hidden rounded-xl border border-line bg-card md:h-[calc(100dvh-18rem)]">
+      <section className={`${active ? "hidden md:flex" : "flex"} w-full min-w-0 flex-col border-line md:w-96 md:shrink-0 md:border-r`}>
         <div className="space-y-2 border-b border-line p-3">
-          <div className="flex gap-1" role="group" aria-label="Filter chats">
-            {TABS.map(({ id, label }) => {
-              const count = filtered.filter((chat) => summaryInTab(chat, id)).length;
-              const on = tab === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => setTab(id)}
-                  className={`min-h-9 flex-1 rounded-md px-2 text-xs font-medium ${on ? "bg-ink text-white" : "text-ink-muted hover:bg-wash hover:text-ink"}`}
-                >
-                  {label} <span className={on ? "text-white/70" : ""}>{count}</span>
-                </button>
-              );
-            })}
-          </div>
+          <SegmentedControl
+            label="Filter chats"
+            value={tab}
+            onValueChange={(v) => setTab(v as InboxTab)}
+            className="w-full"
+            options={TABS.map(({ id, label }) => ({
+              value: id,
+              label,
+              accessory: <span className="tabular-nums text-xs text-ink-muted">{filtered.filter((chat) => summaryInTab(chat, id)).length}</span>,
+            }))}
+          />
           <div className="grid grid-cols-2 gap-1">
             <LabelFilter kind="stage" title="Stage" labels={labels} value={filter.stageId} onChange={(stageId) => setFilter({ ...filter, stageId })} />
-            <button
-              type="button"
+            <Button
+              variant={grouped ? "default" : "outline"}
               aria-pressed={grouped}
               onClick={() => setGrouped((g) => !g)}
-              className={`min-h-9 rounded-md border px-2 text-xs font-medium ${grouped ? "border-ink bg-ink text-white" : "border-line text-ink hover:bg-wash"}`}
             >
               Group by stage
-            </button>
+            </Button>
           </div>
-          <div className="flex items-center gap-2">
-            <label htmlFor="whatsapp-search" className="sr-only">Search name, number or message</label>
-            <input
-              id="whatsapp-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search name, number or message"
-              className="min-w-0 flex-1 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted"
-            />
-            <button
-              type="button"
-              onClick={() => void load(true)}
-              disabled={refreshing}
-              className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline disabled:opacity-60"
-            >
-              {refreshing && <Loader2 className="size-3 animate-spin" aria-hidden />}
-              {refreshing ? "Refreshing…" : "Refresh"}
-            </button>
-          </div>
+          <Input
+            id="whatsapp-search"
+            label="Search chats"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Name, number or message"
+          />
         </div>
-        {error && <p className="m-3 text-sm text-danger bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {visible.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-ink-muted">
@@ -427,13 +421,13 @@ function WhatsappInbox({
                         </span>
                         <span className="tabular-nums text-ink-muted">{g.chats.length}</span>
                       </button>
-                      {open && <ul>{g.chats.map(chatRow)}</ul>}
+                      {open && <ul className="p-1.5">{g.chats.map(chatRow)}</ul>}
                     </section>
                   );
                 })}
               </div>
             ) : (
-              <ul>{visible.map(chatRow)}</ul>
+              <ul className="p-1.5">{visible.map(chatRow)}</ul>
             )
           )}
         </div>
@@ -480,6 +474,7 @@ function WhatsappInbox({
         crm={crm}
       />
     </div>
+    </div>
   );
 }
 
@@ -500,30 +495,16 @@ function LabelFilter({
   return (
     <>
       <label htmlFor={id} className="sr-only">{title}</label>
-      <select
+      <Select
         id={id}
+        aria-label={title}
         value={value ?? ""}
         onChange={(event) => onChange(event.target.value || null)}
-        className={`min-w-0 rounded-md border px-1.5 py-1.5 text-xs ${value ? "border-ink text-ink" : "border-line text-ink-muted"}`}
+        className="min-w-0"
       >
         <option value="">All {title.toLowerCase()}s</option>
         {labels.filter((l) => l.kind === kind).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-      </select>
+      </Select>
     </>
-  );
-}
-
-/** The contact's WhatsApp picture, or their initials when they have none or hide it. */
-function Avatar({ waId, name }: { waId: string; name: string | null }) {
-  const [failed, setFailed] = useState(false);
-  const initials = name ? name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() : waId.slice(-2);
-  return (
-    <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-wash text-xs font-semibold text-ink-muted">
-      {initials}
-      {!failed && (
-        // eslint-disable-next-line @next/next/no-img-element -- admin-only proxied image, no optimiser
-        <img src={`/api/inbox/avatar?wa=${waId}`} alt="" loading="lazy" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />
-      )}
-    </span>
   );
 }
