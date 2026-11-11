@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { WhatsappDesk } from "@/components/inbox/whatsapp-desk";
 import { currentAgent } from "@/lib/agent-gate";
-import { listChats, listLabels } from "@/lib/whatsapp-events";
+import { lastWebhookAt, listChats, listLabels } from "@/lib/whatsapp-events";
 import { whatsappFixtureEnabled } from "@/lib/whatsapp-inbox-fixture";
 import { backfillFromEvents } from "@/lib/whatsapp-store";
 import { dualhookConfig } from "@/lib/dualhook";
@@ -13,6 +13,6 @@ export default async function WhatsappAdminPage() {
   if (!signedIn) redirect("/login");
 
   if (!whatsappFixtureEnabled()) await backfillFromEvents();
-  const [chats, labels] = await Promise.all([listChats(), listLabels()]);
-  return <WhatsappDesk initialChats={chats} initialLabels={labels} transport={dualhookConfig() ? "dualhook" : "gateway"} />;
+  const [chats, labels, webhookAt] = await Promise.all([listChats(), listLabels(), lastWebhookAt()]);
+  return <WhatsappDesk initialChats={chats} initialLabels={labels} initialWebhookAt={webhookAt} transport={dualhookConfig() ? "dualhook" : "gateway"} />;
 }
