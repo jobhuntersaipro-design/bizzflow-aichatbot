@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "agent:create": "tsx scripts/create-agent.ts"
+    "agent:create": "tsx scripts/create-agent.ts",
+    "history:import": "node scripts/import-bizzflow-history.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
