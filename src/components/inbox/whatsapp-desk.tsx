@@ -19,7 +19,8 @@ import {
 import { ChevronRight, Loader2, Sparkles } from "lucide-react";
 import { Progress as ArcProgress } from "@/components/arc/components/progress/progress";
 import SegmentedControl from "@/components/arc/components/segmented-control/segmented-control";
-import { Avatar as ArcAvatar } from "@/components/arc/components/avatar/avatar";
+import { PersonAvatar } from "@/components/inbox/person-avatar";
+import { WindowChip } from "@/components/inbox/window-chip";
 import { Badge } from "@/components/arc/components/badge/badge";
 import { Input } from "@/components/arc/components/input/input";
 import { Select } from "@/components/ui/select";
@@ -312,7 +313,7 @@ function WhatsappInbox({
           aria-current={on ? "true" : undefined}
           className={`grid w-full grid-cols-[28px_minmax(0,1fr)] items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-ink/5 ${on ? "bg-ink/[0.07]" : ""}`}
         >
-          <ArcAvatar size="sm" name={name ?? chat.customer.slice(-2).split("").join(" ")} src={`/api/inbox/avatar?wa=${chat.customer}`} />
+          <PersonAvatar waId={chat.customer} name={name} />
           <span className="grid min-w-0 gap-0.5">
           <span className="flex min-w-0 items-baseline gap-1.5">
             <span className={`max-w-[60%] shrink-0 truncate text-sm text-ink ${chat.unread > 0 ? "font-medium" : ""}`}>{name ?? <span className="font-mono">+{chat.customer}</span>}</span>
@@ -329,11 +330,14 @@ function WhatsappInbox({
               <Badge size="sm" pill className="shrink-0">Closed</Badge>
             ) : null}
           </span>
-          {stage && (
-            <span className="mt-1 flex flex-wrap gap-1">
-              <LabelChip label={stage} />
-            </span>
-          )}
+          <span className="mt-1 flex flex-wrap gap-1 empty:hidden">
+            {transport === "dualhook" && chat.unread > 0 && <WindowChip lastInboundAt={chat.lastInboundAt} />}
+            {stage && <LabelChip label={stage} />}
+            {chat.tagIds.slice(0, 2).map((id) => {
+              const tag = labelById.get(id);
+              return tag ? <LabelChip key={id} label={tag} /> : null;
+            })}
+          </span>
           {chat.signupChance !== null && (
             <ArcProgress value={chat.signupChance} label="Sign-up chance" showValue className="mt-1.5 text-xs" />
           )}
@@ -440,7 +444,7 @@ function WhatsappInbox({
       <section className={`${active ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col`}>
         {active ? (
           <>
-            <details className="border-b border-line px-3 py-2 xl:hidden">
+            <details className="border-b border-line px-3 py-2 lg:hidden">
               <summary className="cursor-pointer text-sm font-medium text-ink">AI analysis, summary & stage</summary>
               <div className="pt-3">{crm}</div>
             </details>
@@ -475,6 +479,9 @@ function WhatsappInbox({
         waId={active?.customer ?? null}
         name={contactName(active?.name)}
         contact={active ? contacts[active.customer] : undefined}
+        chat={active ?? undefined}
+        labelById={labelById}
+        windowRule={transport === "dualhook"}
         crm={crm}
       />
     </div>

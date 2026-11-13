@@ -226,7 +226,7 @@ function Composer({ to, connected, windowClosed, onSent }: { to: string; connect
           <button
             type="submit"
             disabled={sending || !text.trim() || !connected || windowClosed}
-            className="ml-auto min-h-9 rounded-xl bg-brand px-4 text-sm font-medium text-white disabled:opacity-50"
+            className="ml-auto min-h-9 rounded-xl bg-ink px-4 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50"
           >
             {sending ? "Sending…" : "Send"}
           </button>
