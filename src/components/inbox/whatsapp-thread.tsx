@@ -46,7 +46,7 @@ export function WhatsappThread({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5">
+      <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-line px-4 py-2">
         <button
           type="button"
           onClick={onBack}
@@ -54,7 +54,7 @@ export function WhatsappThread({
         >
           Chats
         </button>
-        <h2 className="min-w-0 truncate text-sm font-medium text-ink">
+        <h2 className="min-w-0 truncate text-base font-medium text-ink">
           {name ? <>{name} <span className="font-mono font-normal text-ink-muted">+{chat.customer}</span></> : <span className="font-mono">{chat.customer}</span>}
         </h2>
         <span className="ml-auto" />
@@ -69,7 +69,7 @@ export function WhatsappThread({
         </button>
       </div>
 
-      <div ref={scroller} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+      <div ref={scroller} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-6 py-4">
         {chat.messages.map((message) => <Bubble key={message.id} message={message} />)}
       </div>
 
@@ -88,10 +88,10 @@ function Bubble({ message }: { message: InboxMessage }) {
   const business = message.side === "echo";
   return (
     <div className={`flex ${business ? "justify-end" : "justify-start"}`}>
-      <div className={`max-w-[80%] rounded-lg px-3 py-2 ${business ? "bg-ink text-white" : "bg-wash text-ink"}`}>
+      <div className={`max-w-[72%] rounded-xl px-3 py-2 ${business ? "bg-ink text-white" : "bg-ink/[0.06] text-ink"}`}>
         <span className="sr-only">{business ? "Business" : "Customer"}</span>
         {message.media && <Media media={message.media} />}
-        <p className="whitespace-pre-wrap break-words text-sm">{message.text}</p>
+        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.text}</p>
         <p className={`mt-1 flex items-center justify-end gap-1 text-[11px] ${business ? "text-white/70" : "text-ink-muted"}`}>
           {message.byAi ? <span className="font-semibold">AI ·</span> : message.fromBizzflow && <span>BizzFlow ·</span>}
           {formatKualaLumpur(message.at)}
@@ -189,7 +189,7 @@ function Composer({ to, connected, windowClosed, onSent }: { to: string; connect
   }
 
   return (
-    <div className="border-t border-line p-3">
+    <div className="shrink-0 px-4 pb-4">
       {!connected && (
         <p className="mb-2 text-xs text-amber-700">WhatsApp is not connected. Scan the QR above to reply.</p>
       )}
@@ -199,7 +199,7 @@ function Composer({ to, connected, windowClosed, onSent }: { to: string; connect
         </p>
       )}
       <form
-        className="flex items-end gap-2"
+        className="rounded-[20px] border border-line bg-card shadow-sm transition-colors focus-within:border-line-strong"
         onSubmit={(event) => {
           event.preventDefault();
           void send();
@@ -216,18 +216,21 @@ function Composer({ to, connected, windowClosed, onSent }: { to: string; connect
               void send();
             }
           }}
-          rows={2}
+          rows={3}
           maxLength={4096}
-          placeholder="Type a reply. Enter sends, Shift+Enter for a new line."
-          className="min-h-11 flex-1 resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted"
+          placeholder="Type a reply"
+          className="block w-full resize-none border-0 bg-transparent px-4 pb-1 pt-3 text-sm leading-normal text-ink outline-none placeholder:text-ink-muted"
         />
-        <button
-          type="submit"
-          disabled={sending || !text.trim() || !connected || windowClosed}
-          className="min-h-11 rounded-lg bg-brand px-4 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {sending ? "Sending…" : "Send"}
-        </button>
+        <div className="flex items-center gap-2 px-2 pb-2">
+          <span className="ml-2 hidden text-xs text-ink-muted sm:inline">Enter sends, Shift+Enter for a new line</span>
+          <button
+            type="submit"
+            disabled={sending || !text.trim() || !connected || windowClosed}
+            className="ml-auto min-h-9 rounded-xl bg-brand px-4 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {sending ? "Sending…" : "Send"}
+          </button>
+        </div>
       </form>
     </div>
   );

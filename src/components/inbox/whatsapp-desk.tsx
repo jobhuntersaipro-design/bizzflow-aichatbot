@@ -71,11 +71,11 @@ export function WhatsappDesk({
   }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-ink">WhatsApp</h1>
-          <p className="mt-1 hidden text-sm text-ink-muted sm:block">
+    <div className="space-y-3 md:flex md:h-[calc((100dvh-7.5rem)/var(--inbox-zoom))] md:flex-col md:space-y-0 md:gap-3 md:[zoom:var(--inbox-zoom)] [--inbox-zoom:0.7]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-lg font-medium text-ink">WhatsApp</h1>
+          <p className="hidden text-xs text-ink-muted sm:block">
             Chats from the linked number, sorted into lead stages by AI. Replies send from the business number.
           </p>
         </div>
@@ -90,7 +90,7 @@ export function WhatsappDesk({
       {view === "inbox" ? (
         <>
         {transport === "dualhook" && <WhatsappAlerts />}
-        <details className="group rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink-muted">
+        <details className="group shrink-0 rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink-muted">
           <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-ink">
             <Sparkles className="size-4 shrink-0" aria-hidden />
             How AI sorts chats
@@ -310,17 +310,17 @@ function WhatsappInbox({
           type="button"
           onClick={() => select(chat)}
           aria-current={on ? "true" : undefined}
-          className={`flex w-full gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-wash ${on ? "bg-wash" : ""}`}
+          className={`grid w-full grid-cols-[28px_minmax(0,1fr)] items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-ink/5 ${on ? "bg-ink/[0.07]" : ""}`}
         >
-          <ArcAvatar name={name ?? chat.customer.slice(-2).split("").join(" ")} src={`/api/inbox/avatar?wa=${chat.customer}`} />
-          <span className="block min-w-0 flex-1">
-          <span className="flex items-baseline justify-between gap-2">
-            <span className="truncate text-sm font-medium text-ink">{name ?? <span className="font-mono">+{chat.customer}</span>}</span>
-            <span className="shrink-0 text-[11px] text-ink-muted">{formatKualaLumpur(chat.lastAt)}</span>
+          <ArcAvatar size="sm" name={name ?? chat.customer.slice(-2).split("").join(" ")} src={`/api/inbox/avatar?wa=${chat.customer}`} />
+          <span className="grid min-w-0 gap-0.5">
+          <span className="flex min-w-0 items-baseline gap-1.5">
+            <span className={`max-w-[60%] shrink-0 truncate text-sm text-ink ${chat.unread > 0 ? "font-medium" : ""}`}>{name ?? <span className="font-mono">+{chat.customer}</span>}</span>
+            {name && <span className="min-w-0 flex-1 truncate font-mono text-xs text-ink-muted">+{chat.customer}</span>}
+            <span className={`ml-auto shrink-0 text-xs tabular-nums ${chat.unread > 0 ? "font-medium text-brand" : "text-ink-muted"}`}>{formatKualaLumpur(chat.lastAt)}</span>
           </span>
-          {name && <span className="block truncate font-mono text-xs text-ink-muted">+{chat.customer}</span>}
-          <span className="mt-1 flex items-center justify-between gap-2">
-            <span className="truncate text-sm text-ink-muted">{chat.preview}</span>
+          <span className="flex min-w-0 items-center justify-between gap-2">
+            <span className={`truncate text-sm ${chat.unread > 0 || on ? "text-ink" : "text-ink-soft"}`}>{chat.preview}</span>
             {chat.unread > 0 ? (
               <Badge tone="success" size="sm" pill className="shrink-0">
                 {chat.unread > 99 ? "99+" : chat.unread}<span className="sr-only"> new messages</span>
@@ -330,12 +330,12 @@ function WhatsappInbox({
             ) : null}
           </span>
           {stage && (
-            <span className="mt-1.5 flex flex-wrap gap-1">
+            <span className="mt-1 flex flex-wrap gap-1">
               <LabelChip label={stage} />
             </span>
           )}
           {chat.signupChance !== null && (
-            <ArcProgress value={chat.signupChance} label="Sign-up chance" showValue className="mt-2 text-xs" />
+            <ArcProgress value={chat.signupChance} label="Sign-up chance" showValue className="mt-1.5 text-xs" />
           )}
           </span>
         </button>
@@ -355,7 +355,7 @@ function WhatsappInbox({
   ) : null;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 md:flex md:min-h-0 md:flex-1 md:flex-col md:space-y-0 md:gap-2">
     <SyncStatus
       syncing={syncing}
       syncedAt={syncedAt}
@@ -365,9 +365,20 @@ function WhatsappInbox({
       onRefresh={() => void load(true)}
       refreshing={refreshing}
     />
-    <div className="flex h-[calc(100dvh-13rem)] min-h-[24rem] overflow-hidden rounded-xl border border-line bg-card md:h-[calc(100dvh-18rem)]">
-      <section className={`${active ? "hidden md:flex" : "flex"} w-full min-w-0 flex-col border-line md:w-96 md:shrink-0 md:border-r`}>
-        <div className="space-y-2 border-b border-line p-3">
+    <div className="flex h-[calc(100dvh-13rem)] min-h-[24rem] overflow-hidden rounded-xl border border-line bg-card md:h-auto md:min-h-0 md:flex-1">
+      <section className={`${active ? "hidden md:flex" : "flex"} w-full min-w-0 flex-col border-line md:w-[26rem] md:shrink-0 md:border-r`}>
+        <div className="flex h-14 shrink-0 items-center border-b border-line px-3 [&_label]:sr-only [&>*]:w-full [&>*>*]:w-full">
+          <Input
+            id="whatsapp-search"
+            label="Search chats"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search name, number or message"
+            className="w-full"
+          />
+        </div>
+        <div className="shrink-0 space-y-2 px-3 pb-2 pt-3">
           <SegmentedControl
             label="Filter chats"
             value={tab}
@@ -389,14 +400,6 @@ function WhatsappInbox({
               Group by stage
             </Button>
           </div>
-          <Input
-            id="whatsapp-search"
-            label="Search chats"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Name, number or message"
-          />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {visible.length === 0 ? (
@@ -422,13 +425,13 @@ function WhatsappInbox({
                         </span>
                         <span className="tabular-nums text-ink-muted">{g.chats.length}</span>
                       </button>
-                      {open && <ul className="p-1.5">{g.chats.map(chatRow)}</ul>}
+                      {open && <ul className="px-2 py-1">{g.chats.map(chatRow)}</ul>}
                     </section>
                   );
                 })}
               </div>
             ) : (
-              <ul className="p-1.5">{visible.map(chatRow)}</ul>
+              <ul className="px-2 pb-6 pt-1">{visible.map(chatRow)}</ul>
             )
           )}
         </div>
